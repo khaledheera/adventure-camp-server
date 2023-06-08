@@ -32,12 +32,19 @@ async function run() {
 
     const usersCollection = client.db('adventureCamp').collection('users')
     const classesCollection = client.db('adventureCamp').collection('classes')
+    const instructorsCollection = client.db('adventureCamp').collection('instructors')
 
 
    
 
       app.get('/classes', async (req, res) => {
-        const result = await classesCollection.find().toArray()
+        const limit = parseInt(req.query.limit) || 6;
+        const result = await classesCollection.find().limit(limit).toArray()
+        res.send(result)
+      })
+      app.get('/instructors', async (req, res) => {
+        const limit = parseInt(req.query.limit) || 6;
+        const result = await instructorsCollection.find().limit(limit).toArray()
         res.send(result)
       })
 
