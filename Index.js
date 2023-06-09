@@ -46,6 +46,23 @@ async function run() {
         console.log(result)
         res.send(result)
       })
+
+// Save user email and role in DB
+app.put('/users/:email', async (req, res) => {
+  const email = req.params.email
+  const user = req.body
+  const query = { email: email }
+  const options = { upsert: true }
+  const updateDoc = {
+    $set: user,
+  }
+  const result = await usersCollection.updateOne(query, updateDoc, options)
+  console.log(result)
+  res.send(result)
+})
+
+
+
    
 
       app.get('/classes', async (req, res) => {
@@ -55,7 +72,7 @@ async function run() {
         res.send(result)
       })
       app.get('/allClasses', async (req, res) => {
-        const result = await classesCollection.find().limit(limit).toArray()
+        const result = await classesCollection.find().toArray()
         res.send(result)
       })
 
