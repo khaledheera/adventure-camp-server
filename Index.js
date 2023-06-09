@@ -72,6 +72,16 @@ async function run() {
 
 
 
+
+      app.post('/allClasses', async (req, res) => {
+        const classes = req.body
+        const result = await classesCollection.insertOne(classes)
+        res.send(result)
+      })
+ 
+
+
+
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
     // Send a ping to confirm a successful connection
