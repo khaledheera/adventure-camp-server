@@ -50,6 +50,8 @@ async function run() {
 
     const usersCollection = client.db('adventure').collection('users')
     const classesCollection = client.db('adventure').collection('classes')
+    const selectedCollection = client.db('adventure').collection('selectedClasses')
+    const paymentCollection = client.db('adventure').collection('paidClasses')
     const classUpdatedCollection = client.db('adventure').collection('updatedClasses')
     
 
@@ -194,6 +196,25 @@ async function run() {
         res.send({updateResult,addResult})
       })
 
+      app.put("/updateFeedback/:id",async(req,res)=>{
+        const updateFeedback=req.body
+        const id =req.params.id;
+        const filterClasses={_id:new ObjectId(id)}
+        const filterUpdatedClasses={classId:id}
+        const options={upsert:true};
+
+        const updateDoc={
+          $set:{
+            feedback:updateFeedback.feedback
+          },
+        };
+        const classResult=await classesCollection.updateOne(filterClasses,updateDoc,options) ;
+        const updateClassResult=await classUpdatedCollection.updateOne         (filterUpdatedClasses,updateDoc,options);
+        res.send({classResult,updateClassResult})
+      })
+
+
+    
 
      
       app.post('/addClasses',async(req,res)=>{
@@ -233,8 +254,25 @@ async function run() {
 		});
 
 
+app.get("/selected",async(req,res)=>{
+  const email=req.query.email;
+  const filter={email:email};
+  const result=await selectedCollection.find(filter).toArray();
+  res.send(result);
+})
 
 
+
+app.post('/selected',async(req,res)=>{
+  const data=req.body;
+  const filter={ name: data.name,email:data.email}
+  const findData= await selectedCollection.findOne(filter);
+  if (findData){
+    return res.send("Already Exists")
+  }
+  const result=await selectedCollection.insertOne(data)
+    res.send(result)
+})
 
 
 
