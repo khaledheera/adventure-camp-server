@@ -50,7 +50,8 @@ async function run() {
 
     const usersCollection = client.db('adventure').collection('users')
     const classesCollection = client.db('adventure').collection('classes')
-    const instructorsCollection = client.db('adventure').collection('instructors')
+    const classUpdatedCollection = client.db('adventure').collection('updatedClasses')
+    
 
     app.post('/jwt', (req, res) => {
       const user = req.body;
@@ -168,6 +169,28 @@ async function run() {
         const result=await classesCollection.find(query).sort({students:-1}).limit(limit).toArray()
       res.send(result)
       })
+      
+      app.get('/manageClasses',async(req,res)=>{
+        const query={status:"Pending"};
+        const result=await classesCollection.find(query).limit(limit).toArray()
+      res.send(result)
+      })
+      app.get('/updatedClasses',async(req,res)=>{
+        const result=await classUpdatedCollection.find(query).limit(limit).toArray()
+      res.send(result)
+      })
+      
+      app.patch("/manageClasses/:id",async(req,res)=>{
+        const {updateStatus,classUpdateData}=req.body
+        const id =req.params.id;
+        const filter={_id:new ObjectId(id)}
+        const updatedDoc={
+          $set:{
+            status:updateStatus.status
+          }
+        }
+      })
+
 
      
       app.post('/addClasses',async(req,res)=>{
