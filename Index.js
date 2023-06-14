@@ -172,11 +172,11 @@ async function run() {
       
       app.get('/manageClasses',async(req,res)=>{
         const query={status:"Pending"};
-        const result=await classesCollection.find(query).limit(limit).toArray()
+        const result=await classesCollection.find(query).toArray()
       res.send(result)
       })
       app.get('/updatedClasses',async(req,res)=>{
-        const result=await classUpdatedCollection.find(query).limit(limit).toArray()
+        const result=await classUpdatedCollection.find().toArray()
       res.send(result)
       })
       
@@ -187,8 +187,11 @@ async function run() {
         const updatedDoc={
           $set:{
             status:updateStatus.status
-          }
-        }
+          },
+        };
+        const updateResult=await classesCollection.updateOne(filter,updatedDoc) ;
+        const addResult=await classUpdatedCollection.insertOne(classUpdateData);
+        res.send({updateResult,addResult})
       })
 
 
