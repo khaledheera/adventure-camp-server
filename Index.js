@@ -261,6 +261,13 @@ app.get("/selected",async(req,res)=>{
   res.send(result);
 })
 
+app.delete("/deleted/:id",async(req,res)=>{
+  const id=res.params.id;
+  const filter={_id:new ObjectId(id)}
+  const result=await selectedCollection.deleteOne(filter)
+  res.send(result);
+})
+
 
 
 app.post('/selected',async(req,res)=>{
