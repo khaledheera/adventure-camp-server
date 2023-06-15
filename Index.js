@@ -3,6 +3,8 @@ const app = express()
 const cors = require('cors')
 const jwt = require('jsonwebtoken');
 require('dotenv').config()
+
+const stripe = require('stripe')(process.env.PAYMENT_SECRET_KEY)
 const port = process.env.PORT || 5000
 
 // middleware
@@ -251,19 +253,25 @@ async function run() {
 
 			const result = await productCollections.updateOne(filter, updatedDoc);
 			res.send(result);
-		});
+		})
 
 
-app.get("/selected",async(req,res)=>{
+// app.get("/selected",async(req,res)=>{
+//   const email=req.query.email;
+//   const filter={email:email};
+//   const result=await selectedCollection.find(filter).toArray();
+//   res.send(result);
+// })
+app.get('/selected', async (req, res) => {
   const email=req.query.email;
   const filter={email:email};
-  const result=await selectedCollection.find(filter).toArray();
+  const result = await selectedCollection.find(filter).toArray();
   res.send(result);
 })
 
-app.delete("/deleted/:id",async(req,res)=>{
-  const id=res.params.id;
-  const filter={_id:new ObjectId(id)}
+app.delete("/selected/:id",async(req,res)=>{
+  const id=req.params.id;
+  const filter={ _id: new ObjectId(id)}
   const result=await selectedCollection.deleteOne(filter)
   res.send(result);
 })
@@ -272,7 +280,7 @@ app.delete("/deleted/:id",async(req,res)=>{
 
 app.post('/selected',async(req,res)=>{
   const data=req.body;
-  const filter={ name: data.name,email:data.email}
+  const filter={  instructor_name: data. instructor_name,instructor_email:data.instructor_email}
   const findData= await selectedCollection.findOne(filter);
   if (findData){
     return res.send("Already Exists")
@@ -283,6 +291,67 @@ app.post('/selected',async(req,res)=>{
 
 
 
+
+
+app.get("/selected/:id", async (req, res) => {
+  const id = req.params.id;
+  const filter = { _id: new ObjectId(id) };
+  const result = await selectedCollection.findOne(filter);
+  res.send(result);
+});
+
+ // Create Payment intent
+ app.post("/create-payment-intent", async (req, res) => {
+  const { price } = req.body;
+
+  const amount = parseInt(price * 100);
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: amount,
+    currency: "USD",
+    payment_method_types: ["card"],
+  });
+  res.send({
+    clientSecret: paymentIntent.client_secret,
+  });
+});
+
+app.post("/payments",  async (req, res) => {
+  const payment = req.body;
+  const insertResult = await paymentCollection.insertOne(payment);
+
+  const query = {
+    _id: new ObjectId(payment.selectedClassId),
+  };
+  const deleteResult = await selectedCollection.deleteMany(query);
+  res.send({ insertResult, deleteResult });
+});
+
+// app.get("/payment",async(req,res)=>{
+//   const email=req.query.email;
+//   const filter={email:email};
+//   const result = await paymentCollection.find(filter).toArray();
+//   res.send(result);
+// })
+app.get('/payment/:email', async (req, res) => {
+  const paid = paymentCollection.find();
+  const result = await paid.toArray();
+  res.send(result);
+})
+
+// After payment increase student number with 1
+
+app.patch("/classes/:id", async (req, res) => {
+  const id = req.params.id;
+  const filter = { _id: new ObjectId(id) };
+  const findClass = await classesCollection.findOne(filter);
+  const updateDoc = {
+    $set: {
+      students: findClass.students + 1,
+    },
+  };
+  const updateResult = await classesCollection.updateOne(filter, updateDoc);
+  res.send(updateResult);
+});
 
 
     // Connect the client to the server	(optional starting in v4.7)
