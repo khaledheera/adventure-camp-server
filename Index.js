@@ -98,7 +98,7 @@ async function run() {
       });
 
      
-      app.get('/users/:email', async (req, res) => {
+      app.get('/users/:email',verifyJWT, async (req, res) => {
         const email = req.params.email
         const query = { email: email }
         const result = await usersCollection.findOne(query)
@@ -332,7 +332,7 @@ app.post("/payments",  async (req, res) => {
 //   const result = await paymentCollection.find(filter).toArray();
 //   res.send(result);
 // })
-app.get('/payment/:email', async (req, res) => {
+app.get('/payment/:email',verifyJWT, async (req, res) => {
   const paid = paymentCollection.find();
   const result = await paid.toArray();
   res.send(result);
