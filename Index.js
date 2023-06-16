@@ -98,7 +98,7 @@ async function run() {
       });
 
      
-      app.get('/users/:email',verifyJWT, async (req, res) => {
+      app.get('/users/:email', async (req, res) => {
         const email = req.params.email
         const query = { email: email }
         const result = await usersCollection.findOne(query)
@@ -135,18 +135,7 @@ async function run() {
         res.send(result);
   
       })
-      app.get('/users/instructor/:email', verifyJWT, async (req, res) => {
-        const email = req.params.email;
-  
-        if (req.decoded.email !== email) {
-          res.send({ admin: false })
-        }
-  
-        const query = { email: email }
-        const user = await usersCollection.findOne(query);
-        const result = { admin: user?.role === 'admin' }
-        res.send(result);
-      })
+     
 
 
       
@@ -256,12 +245,7 @@ async function run() {
 		})
 
 
-// app.get("/selected",async(req,res)=>{
-//   const email=req.query.email;
-//   const filter={email:email};
-//   const result=await selectedCollection.find(filter).toArray();
-//   res.send(result);
-// })
+
 app.get('/selected', async (req, res) => {
   const email=req.query.email;
   const filter={email:email};
@@ -280,7 +264,7 @@ app.delete("/selected/:id",async(req,res)=>{
 
 app.post('/selected',async(req,res)=>{
   const data=req.body;
-  const filter={  instructor_name: data. instructor_name,instructor_email:data.instructor_email}
+  const filter={className:data.className, email:data.email}
   const findData= await selectedCollection.findOne(filter);
   if (findData){
     return res.send("Already Exists")
@@ -326,17 +310,17 @@ app.post("/payments",  async (req, res) => {
   res.send({ insertResult, deleteResult });
 });
 
-// app.get("/payment",async(req,res)=>{
-//   const email=req.query.email;
-//   const filter={email:email};
-//   const result = await paymentCollection.find(filter).toArray();
-//   res.send(result);
-// })
-app.get('/payment/:email',verifyJWT, async (req, res) => {
-  const paid = paymentCollection.find();
-  const result = await paid.toArray();
+app.get("/payment",async(req,res)=>{
+  const email=req.query.email;
+  const filter={email:email};
+  const result = await paymentCollection.find(filter).toArray();
   res.send(result);
 })
+// app.get('/payment/:email', async (req, res) => {
+//   const paid = paymentCollection.find();
+//   const result = await paid.toArray();
+//   res.send(result);
+// })
 
 // After payment increase student number with 1
 
@@ -355,7 +339,7 @@ app.patch("/classes/:id", async (req, res) => {
 
 
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
